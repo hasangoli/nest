@@ -1,4 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Flavor } from './flavor.entity';
 
 @Entity()
 export class Coffee {
@@ -11,6 +18,8 @@ export class Coffee {
   @Column()
   brand: string;
 
-  @Column('json', { nullable: true })
+  @JoinTable() // Specifies the owner side of relationship
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  @ManyToMany((type: never) => Flavor, (flavor) => flavor.coffees)
   flavors: string[];
 }
