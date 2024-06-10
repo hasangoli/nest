@@ -20,6 +20,8 @@ export class Coffee {
 
   @JoinTable() // Specifies the owner side of relationship
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  @ManyToMany((type: never) => Flavor, (flavor) => flavor.coffees)
-  flavors: string[];
+  @ManyToMany((type: never) => Flavor, (flavor) => flavor.coffees, {
+    cascade: true, // automatically insert flavors into the database
+  })
+  flavors: Flavor[];
 }
