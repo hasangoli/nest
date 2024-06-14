@@ -19,7 +19,8 @@ export class CoffeesService {
     private readonly connection: Connection,
     private readonly configService: ConfigService,
   ) {
-    console.log(configService.get<string>('DATABASE_HOST'));
+    console.log('DATABASE_HOST: ', configService.get<string>('DATABASE_HOST'));
+    console.log('database.host: ', configService.get<string>('database.host'));
   }
 
   findAll(paginationQuery: PaginationQueryDto): Promise<Coffee[]> {
