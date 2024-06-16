@@ -1,7 +1,8 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { HttpExceptionFilter } from './common/filter/http-exception/http-exception.filter';
+import { HttpExceptionFilter } from './common/filter/http-exception.filter';
+import { WrapResponseInterceptor } from './common/interceptors/wrap-response.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,6 +17,7 @@ async function bootstrap() {
     }),
   );
   app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalInterceptors(new WrapResponseInterceptor());
   // app.useGlobalGuards(new ApiKeyGuard()); // no need after declaring APP_GUARD in common module
   await app.listen(3000);
 }
