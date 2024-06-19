@@ -1,42 +1,46 @@
-import { Injectable } from '@nestjs/common';
-import { CreateCoffeeDto } from './dto/create-coffee.dto';
-import { UpdateCoffeeDto } from './dto/update-coffee.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { Coffee } from './entities/coffee.entity';
 
 @Injectable()
 export class CoffeesService {
-  private coffees: Coffee[] = [];
+  constructor(
+    @InjectModel(Coffee.name) private readonly coffeeModel: Model<Coffee>,
+  ) {}
 
-  findAll(): Coffee[] {
-    return this.coffees;
+  findAll() {
+    return this.coffeeModel.find().exec();
   }
 
-  findOne(id: string): Coffee {
-    return this.coffees.find((coffee: Coffee): boolean => coffee.id === +id);
+  async findOne(id: string) {
+    const coffee = await this.coffeeModel.findOne({ _id: id }).exec();
+
+    if (!coffee) throw new NotFoundException(`Coffee #${id} not found`);
+
+    return coffee;
   }
 
-  create(createCoffeeDto: CreateCoffeeDto) {
-    this.coffees.push({
-      id: this.coffees.length + 1,
-      ...createCoffeeDto,
-    });
+  create(createCoffeeDto: any) {
+    const coffee = new this.coffeeModel(createCoffeeDto);
 
-    return createCoffeeDto;
+    return coffee.save();
   }
 
-  update(id: string, updateCoffeeDto: UpdateCoffeeDto) {
-    const existingCoffee: Coffee = this.findOne(id);
-    if (existingCoffee) {
-      console.log(updateCoffeeDto);
-    }
+  async update(id: string, updateCoffeeDto: any) {
+    const existingCoffee = await this.coffeeModel
+      .findOneAndUpdate({ _id: id }, { $set: updateCoffeeDto }, { new: true })
+      .exec();
+
+    if (!existingCoffee) throw new NotFoundException(`Coffee #${id} not found`);
+
+    return existingCoffee;
   }
 
-  remove(id: string) {
-    const coffeeIndex: number = this.coffees.findIndex(
-      (coffee: Coffee): boolean => coffee.id === +id,
-    );
-    if (coffeeIndex >= 0) {
-      this.coffees.splice(coffeeIndex, 1);
-    }
+  async remove(id: string) {
+    const deleteCoffee = await this.coffeeModel
+      .findByIdAndDelete({ _id: id })
+      .exec();
+    return deleteCoffee;
   }
 }
